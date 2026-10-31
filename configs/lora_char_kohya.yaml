@@ -1,0 +1,42 @@
+# Row: lo_char (kohya)   LoRA r16/a8 under the shipped kohya recipe. Score 0.05.
+#
+# Included ONLY to quantify the recipe confound -- it is not the fair opponent.
+# Its per-weight displacement is 1/33 of GPart's, and it scores below base.
+name: lora_char_kohya
+adapter: lora
+rank: 16
+alpha: 8
+targets: ["to_q", "to_k", "to_v", "to_out.0", "ff.net.0.proj", "ff.net.2"]
+scope: transformer_block
+layers_pattern: transformer_blocks
+data: data/aima_var
+output: runs/lora_char_kohya
+
+train:
+  # kohya recipe: 10 epochs x 21 images x 3 captions / batch 4 ~= 160 steps.
+  # Not a matched-run: lr and schedule are the point of this row.
+  steps: 160
+  grad_accum: 4
+  lr: 1.0e-4
+  lr_schedule: cosine_with_restarts
+  warmup: 0
+  weight_decay: 0.0
+  max_res: 1024
+  noise_offset: 0.0
+  min_snr_gamma: 5.0
+  grad_clip: 1.0
+  seed: 42
+  holdout: 4
+  val_every: 50
+  val_batches: 4
+  save_every: 0
+
+sample:
+  alpha: [1.0, 1.5, 2.0, 3.0]   # 1.0 is dead; the optimum is ~2.0 at 0.27
+  steps: 30
+  cfg: 5.0
+  size: [832, 1216]
+  sched: euler_a
+  spacing: trailing
+  seeds: [310977364113511, 12345, 67890, 111111, 222222, 333333]
+  prompts: configs/prompts/p0_p1.jsonl

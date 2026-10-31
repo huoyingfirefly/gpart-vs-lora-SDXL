@@ -1,0 +1,38 @@
+# Row: lo_char_matched   LoRA r8/a4, all-linear, same recipe as GPart. Score 0.70.
+# 20.9 M parameters vs GPart's 23.2 M -- GPart has more capacity here.
+name: lora_char_matched
+adapter: lora
+rank: 8
+alpha: 4
+targets: ["to_q", "to_k", "to_v", "to_out.0", "ff.net.0.proj", "ff.net.2"]
+scope: transformer_block
+layers_pattern: transformer_blocks
+data: data/aima_var
+output: runs/lora_char_matched
+
+train:
+  steps: 1200
+  grad_accum: 2
+  lr: 5.0e-4
+  lr_schedule: constant
+  warmup: 50
+  weight_decay: 0.0
+  max_res: 1536
+  noise_offset: 0.05
+  min_snr_gamma: 5.0
+  grad_clip: 1.0
+  seed: 42
+  holdout: 4
+  val_every: 200
+  val_batches: 4
+  save_every: 200
+
+sample:
+  alpha: [1.0, 1.5, 2.0]   # saturates at 1.0; the rest are the degradation check
+  steps: 30
+  cfg: 5.0
+  size: [832, 1216]
+  sched: euler_a
+  spacing: trailing
+  seeds: [310977364113511, 12345, 67890, 111111, 222222, 333333]
+  prompts: configs/prompts/p0_p1.jsonl

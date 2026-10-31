@@ -1,0 +1,45 @@
+# model weights and caches
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.onnx
+*.npz
+# `data/*` (not `data/**`) so the negations below actually re-include files:
+# git will not descend into a directory whose contents are all ignored.
+data/*
+!data/README.md
+!data/sd_xl_base.yaml
+
+# run outputs (anchored: an unanchored `logs/` would also swallow results/logs/)
+/outputs/
+/runs/
+/logs/
+wandb/
+
+# generated results (tables/figures are committed explicitly)
+results/figures/*.tmp
+results/logs/*
+!results/logs/.gitkeep
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# scratch
+*.tmp
+*.bak
+*.old_*
+_samplercheck/

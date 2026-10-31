@@ -1,0 +1,7 @@
+| config | char_score | dRGB | S | edge | n_images |
+|---|---|---|---|---|---|
+| base | 0.08 | 0.0 | 0.297 | 0.028 | 6 |
+| lo_stack_kohya | 0.0 | None | None | None | 6 |
+| lo_stack_matched | 0.57 | 0.206 | 0.249 | 0.029 | 6 |
+| gp_stack_attn_style+attn_char | 0.4 | 0.206 | 0.161 | 0.021 | 6 |
+| gp_stack_attn_style+alllinear_char | 0.27 | 0.177 | 0.129 | 0.021 | 6 |

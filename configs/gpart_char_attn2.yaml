@@ -1,0 +1,38 @@
+# Row: gp_char           GPart, attention-only, shipped recipe. Score 0.43.
+name: gpart_char_attn2
+adapter: gpart
+d: 23224320
+targets: ["attn2.to_q", "attn2.to_k", "attn2.to_v", "attn2.to_out.0"]
+scope: transformer_block
+layers_pattern: transformer_blocks
+backend: stateless
+partition_mode: splitmix64
+data: data/aima_var
+output: runs/gpart_char_attn2
+
+train:
+  steps: 1200
+  grad_accum: 2
+  lr: 5.0e-4
+  lr_schedule: constant
+  warmup: 50
+  weight_decay: 0.0
+  max_res: 1536
+  noise_offset: 0.05
+  min_snr_gamma: 5.0
+  grad_clip: 1.0
+  seed: 42
+  holdout: 4
+  val_every: 200
+  val_batches: 4
+  save_every: 200
+
+sample:
+  alpha: 1.0
+  steps: 30
+  cfg: 5.0
+  size: [832, 1216]
+  sched: euler_a
+  spacing: trailing
+  seeds: [310977364113511, 12345, 67890, 111111, 222222, 333333]
+  prompts: configs/prompts/p0_p1.jsonl

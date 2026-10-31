@@ -1,0 +1,38 @@
+# Row: lo_style_matched   LoRA style, matched recipe.
+# dRGB 0.168, S 0.240, edge 0.028 (base edge is 0.028 -- detail fully retained).
+name: lora_style_matched
+adapter: lora
+rank: 8
+alpha: 4
+targets: ["to_q", "to_k", "to_v", "to_out.0", "ff.net.0.proj", "ff.net.2"]
+scope: transformer_block
+layers_pattern: transformer_blocks
+data: data/style_var
+output: runs/lora_style_matched
+
+train:
+  steps: 600
+  grad_accum: 2
+  lr: 5.0e-4
+  lr_schedule: constant
+  warmup: 50
+  weight_decay: 0.0
+  max_res: 1536
+  noise_offset: 0.05
+  min_snr_gamma: 5.0
+  grad_clip: 1.0
+  seed: 42
+  holdout: 4
+  val_every: 200
+  val_batches: 4
+  save_every: 0
+
+sample:
+  alpha: 1.0
+  steps: 30
+  cfg: 5.0
+  size: [832, 1216]
+  sched: euler_a
+  spacing: trailing
+  seeds: [310977364113511, 12345, 67890]
+  prompts: configs/prompts/style.jsonl

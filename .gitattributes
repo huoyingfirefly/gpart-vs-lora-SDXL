@@ -1,0 +1,18 @@
+# Normalize to LF in the repository. Windows checkouts get CRLF for text, which
+# is fine for .py/.md but breaks shell scripts under Git Bash ("bad interpreter:
+# /bin/bash^M"), so .sh is pinned to LF everywhere.
+* text=auto
+
+*.sh   text eol=lf
+*.py   text eol=lf
+*.md   text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+*.bat  text eol=crlf
+
+*.png  binary
+*.jpg  binary
+*.onnx binary
+*.safetensors binary
