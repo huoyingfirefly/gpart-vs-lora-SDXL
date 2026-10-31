@@ -186,6 +186,11 @@ Do not extend the results with any of these:
 | `docs/06-release-checklist.md` | IP, licenses, path cleanup — before this goes public |
 | `MIGRATION.md` | working tree → this repo, file by file |
 
+Simplified Chinese translations of `docs/00`–`06` sit next to the originals as
+`docs/*.zh-CN.md`. Section numbers, tables and numbers mirror the English, and
+ambiguous terms (partition, adapter, checkpoint, α/strength, target module) are
+left untranslated. **Where the two disagree, the English is authoritative.**
+
 ## License and content
 
 Code: Apache-2.0 (see `LICENSE`). The vendored GPart/PEFT code keeps its original

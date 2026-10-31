@@ -168,19 +168,21 @@ python -m src.eval.tag_eval --model /path/to/wd14/model.onnx \
 
 ## 阅读顺序
 
-| | |
-|---|---|
-| `docs/00-claims.md` | 有据可查的主张，以及更长的那份「不主张」清单 |
-| `docs/01-protocol.md` | 对齐了哪些变量，以及这套协议是防哪种混乱的 |
-| `docs/02-results-character.md` | 角色还原：开箱结论、覆盖排除、α 扫描 |
-| `docs/03-results-style-stacking.md` | 画风迁移与加法叠加 |
-| `docs/04-cost-model.md` | 每步耗时，以及为什么瓶颈不是哈希 |
-| `docs/05-limitations.md` | 每一个没测的旋钮，逐条列 |
-| `docs/06-release-checklist.md` | IP、许可证、路径清理 —— 公开之前 |
-| `MIGRATION.md` | 工作树 → 本仓库，逐文件 |
+| | | |
+|---|---|---|
+| `docs/00-claims.md` | `00-claims.zh-CN.md` | 有据可查的主张，以及更长的那份「不主张」清单 |
+| `docs/01-protocol.md` | `01-protocol.zh-CN.md` | 对齐了哪些变量，以及这套协议是防哪种混乱的 |
+| `docs/02-results-character.md` | `02-results-character.zh-CN.md` | 角色还原：开箱结论、覆盖排除、α 扫描 |
+| `docs/03-results-style-stacking.md` | `03-results-style-stacking.zh-CN.md` | 画风迁移与加法叠加 |
+| `docs/04-cost-model.md` | `04-cost-model.zh-CN.md` | 每步耗时，以及为什么瓶颈不是哈希 |
+| `docs/05-limitations.md` | `05-limitations.zh-CN.md` | 每一个没测的旋钮，逐条列 |
+| `docs/06-release-checklist.md` | `06-release-checklist.zh-CN.md` | IP、许可证、路径清理 —— 公开之前 |
+| `MIGRATION.md` | — | 工作树 → 本仓库，逐文件 |
 
-（`docs/` 目前只有英文版。考虑到那份文档里塞满了 `‖ΔW‖`、`min-SNR γ`、`trailing`
-这类术语，翻译带来的歧义风险大于阅读收益；要中文版可以直接提。）
+中文版是英文版的镜像，章节编号、表格、数字一一对应。有歧义的术语（partition、
+adapter、checkpoint、强度/α、target module 等）保留英文原词，不翻译 —— 这些词在
+中文里的对应译法不止一种，翻成中文反而更容易读歪。**两份内容不一致时，以英文版
+为准。**
 
 ## 许可与内容
 
