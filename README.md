@@ -60,6 +60,12 @@ character.
 
 ![Style: base model vs GPart](results/figures/readme/showcase_style.jpg)
 
+**Stacking.** A style adapter and a character adapter loaded together — base
+0.08 → 0.40, so the character survives the style adapter rather than being
+averaged away.
+
+![Style + character stacked: base model vs GPart](results/figures/readme/showcase_stacking.jpg)
+
 α 1.5 is GPart's peak, and it is paid for in image quality — see
 `docs/02-results-character.md` §3. These two sheets show the GPart arm only; the
 LoRA runs this comparison is measured against, and full-resolution versions of

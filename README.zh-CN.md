@@ -58,6 +58,11 @@ GPart 取最优强度，和基模对比。prompt 用 `p0`（干净场景，只�
 
 ![画风：基模 vs GPart](results/figures/readme/showcase_style.jpg)
 
+**叠加。** 画风 adapter 和角色 adapter 同时加载 —— 基模 0.08 → 0.40，角色没有被
+画风平均掉，而是留下了。
+
+![画风 + 角色叠加：基模 vs GPart](results/figures/readme/showcase_stacking.jpg)
+
 α1.5 是 GPart 的峰值，这个峰值是用图像质量换来的 —— 见
 `02-results-character.zh-CN.md` §3。这两张只展示 GPart 这一条臂；作为对照的 LoRA
 结果，以及五张对比图的全尺寸版本，都在 [`results/figures/`](results/figures/)。

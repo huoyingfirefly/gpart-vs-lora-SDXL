@@ -27,10 +27,13 @@ SEEDS = ["310977364113511", "12345", "67890"]
 # source sheet -> (first row y, row height, row pitch, label column width)
 GEOMETRY = {
     "alpha": (84, 438, 478, 290),
+    "stack": (84, 438, 478, 290),
     "style": (86, 497, 539, 300),
 }
 
-# (source, row index) pairs, in draw order
+# (source, row index, source sheet, optional label lines) in draw order.
+# A label is [(text, size, grey)] and overwrites the label column -- used where
+# the source sheet's own label is clipped by its 290 px column.
 SHEETS = {
     "showcase_character": {
         "title": "角色 · 基模 vs GPart（全参 α1.5，tag score 0.57 vs base 0.08）",
@@ -41,6 +44,15 @@ SHEETS = {
         "title": "画风 · 基模 vs GPart（attn2，终版）",
         "rows": [("style", 0, "horizontal_full_prompt_style.png"),  # base
                  ("style", 3, "horizontal_full_prompt_style.png")],  # GPart attn2
+    },
+    "showcase_stacking": {
+        "title": "画风 + 角色叠加 · 基模 vs GPart（画风 attn2 + 角色 attn2）",
+        "rows": [
+            ("stack", 0, "horizontal_stacking_p0.png"),  # base
+            ("stack", 3, "horizontal_stacking_p0.png",   # GPart attn2 pair
+             [("GPart 叠加", 24, 0), ("画风 attn2 +", 19, 0),
+              ("角色 attn2", 19, 0), ("char 0.40", 19, 90)]),
+        ],
     },
 }
 
@@ -62,7 +74,7 @@ def crop_row(name: str, index: int, source: str) -> Image.Image:
 
 
 def build(key: str, spec: dict) -> None:
-    rows = [crop_row(name, idx, src) for name, idx, src in spec["rows"]]
+    rows = [crop_row(row[0], row[1], row[2]) for row in spec["rows"]]
     width = rows[0].width
     _, row_h, pitch, lab_w = GEOMETRY[spec["rows"][0][0]]
     assert all(r.width == width for r in rows), "rows must share a width"
@@ -82,8 +94,14 @@ def build(key: str, spec: dict) -> None:
         draw.text((x, header - 26), f"seed {seed}", fill=(90, 90, 90), font=f)
 
     y = header
-    for row in rows:
+    for spec_row, row in zip(spec["rows"], rows):
         sheet.paste(row, (0, y))
+        if len(spec_row) > 3:          # redraw the label column
+            draw.rectangle((0, y, lab_w, y + row_h), fill="white")
+            ty = y + 34
+            for text, size, grey in spec_row[3]:
+                draw.text((14, ty), text, fill=(grey, grey, grey), font=font(size))
+                ty += size + 12
         y += row_h + (pitch - row_h)
 
     OUT.mkdir(parents=True, exist_ok=True)

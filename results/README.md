@@ -28,10 +28,11 @@ Chinese; `MIGRATION.md` §3 has the mapping.
 | `horizontal_full_prompt_style.png` | full prompt, 3 seeds: base / LoRA style / GPart all-linear style / GPart attn2 style |
 | `horizontal_stacking_p0.png` | `p0`, 3 seeds: base / kohya stack / matched stack / both GPart stacks |
 
-`readme/` holds the two showcase sheets linked from the README: base model vs
-GPart at its best setting, no LoRA rows. They are cropped out of the sheets
-above and re-composited by `src/figures/readme_sheet.py` at 1000 px JPEG —
-regenerate with that script rather than editing the files.
+`readme/` holds the three showcase sheets linked from the README: base model vs
+GPart at its best setting — character, style, and the style+character stack —
+with no LoRA rows. They are cropped out of the sheets above and re-composited by
+`src/figures/readme_sheet.py` at 1000 px JPEG; regenerate with that script rather
+than editing the files.
 
 **These are the files to remove if the character IP is not cleared** — see
 `docs/06-release-checklist.md` §1. That includes `readme/`, which is more
