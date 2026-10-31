@@ -105,11 +105,12 @@ tag 分数在涨，图像在变差 —— 这正是「分数本身不是质量�
 
 | 图 | 内容 |
 |---|---|
-| `results/figures/horizontal_full_prompt_character.png` | base / kohya LoRA / matched LoRA / GPart attn2 / GPart all-linear，完整 prompt |
-| `results/figures/horizontal_alpha_sweep_top.png` | α 1.0 / 1.3 / 1.5 / 1.8，前半 |
-| `results/figures/horizontal_alpha_sweep_bottom.png` | α 1.5 / 1.8，后半 |
+| `results/figures/horizontal_full_prompt_character.png` | 完整 prompt，6 个 seed：base / kohya LoRA / GPart attn2 / matched LoRA |
+| `results/figures/horizontal_alpha_sweep_top.png` | `p0`，3 个 seed：base / matched LoRA / GPart attn2（α 1.0）/ GPart all-linear（α 1.0） |
+| `results/figures/horizontal_alpha_sweep_bottom.png` | `p0`，3 个 seed：GPart all-linear 的 α 1.3 / 1.5 / 1.8 |
 
-在接受 0.57 这个峰值之前，先把同一张图里 α 1.5 和 1.8 两行拿去和 α 1.0 对比。
+在接受 0.57 这个峰值之前，先把下面那张图里 α 1.5 和 1.8 两行，拿去和上面那张图里
+α 1.0 那一行对比。
 
 ## 6. 本任务特有的注意事项
 

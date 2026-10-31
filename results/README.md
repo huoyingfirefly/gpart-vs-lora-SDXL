@@ -22,14 +22,18 @@ Chinese; `MIGRATION.md` §3 has the mapping.
 
 | file | shows |
 |---|---|
-| `horizontal_full_prompt_character.png` | base / kohya LoRA / matched LoRA / GPart attn2 / GPart all-linear |
-| `horizontal_alpha_sweep_top.png` | α 1.0 / 1.3 / 1.5 / 1.8 |
-| `horizontal_alpha_sweep_bottom.png` | α 1.5 / 1.8 (continued) |
-| `horizontal_full_prompt_style.png` | style rows |
-| `horizontal_stacking_p0.png` | base / kohya stack / matched stack / both GPart stacks |
+| `horizontal_full_prompt_character.png` | full prompt, 6 seeds: base / kohya LoRA / GPart attn2 / matched LoRA |
+| `horizontal_alpha_sweep_top.png` | `p0`, 3 seeds: base / matched LoRA / GPart attn2 (α 1.0) / GPart all-linear (α 1.0) |
+| `horizontal_alpha_sweep_bottom.png` | `p0`, 3 seeds: GPart all-linear at α 1.3 / 1.5 / 1.8 |
+| `horizontal_full_prompt_style.png` | full prompt, 3 seeds: base / LoRA style / GPart all-linear style / GPart attn2 style |
+| `horizontal_stacking_p0.png` | `p0`, 3 seeds: base / kohya stack / matched stack / both GPart stacks |
+
+`readme/` holds 1000 px JPEG renders of three of the sheets, for the README.
+They are derived files — regenerate from the PNGs rather than editing them.
 
 **These are the files to remove if the character IP is not cleared** — see
-`docs/06-release-checklist.md` §1.
+`docs/06-release-checklist.md` §1. That includes `readme/`, which is more
+exposed than the rest because the README is the first thing a visitor sees.
 
 ## `logs/`
 

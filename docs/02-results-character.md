@@ -114,12 +114,12 @@ do not read the ordering between them as a curve.)
 
 | figure | shows |
 |---|---|
-| `results/figures/horizontal_full_prompt_character.png` | base / kohya LoRA / matched LoRA / GPart attn2 / GPart all-linear, full prompt |
-| `results/figures/horizontal_alpha_sweep_top.png` | α 1.0 / 1.3 / 1.5 / 1.8, first half |
-| `results/figures/horizontal_alpha_sweep_bottom.png` | α 1.5 / 1.8, second half |
+| `results/figures/horizontal_full_prompt_character.png` | full prompt, 6 seeds: base / kohya LoRA / GPart attn2 / matched LoRA |
+| `results/figures/horizontal_alpha_sweep_top.png` | `p0`, 3 seeds: base / matched LoRA / GPart attn2 (α 1.0) / GPart all-linear (α 1.0) |
+| `results/figures/horizontal_alpha_sweep_bottom.png` | `p0`, 3 seeds: GPart all-linear at α 1.3 / 1.5 / 1.8 |
 
-Compare the α 1.5 and 1.8 rows against α 1.0 in the same figure before accepting
-the 0.57 peak number.
+Compare the α 1.5 and 1.8 rows in the bottom sheet against the α 1.0 row in the
+top sheet before accepting the 0.57 peak number.
 
 ## 6. Caveats specific to this task
 
