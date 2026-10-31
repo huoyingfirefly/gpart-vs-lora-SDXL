@@ -46,27 +46,24 @@ for the exact controls and `docs/02-results-character.md` for the numbers.
 
 ## Results at a glance
 
-Prompt `p0` (clean scene, trigger token only — the discriminating prompt), 3 of
-the 6 scored seeds, WD14 tag score in each row label. Full-resolution sheets and
-the two figures not shown here are in [`results/figures/`](results/figures/).
+GPart at its best setting, against the base model. Prompt `p0` (clean scene,
+trigger token only — the discriminating prompt), 3 of the 6 scored seeds: so all
+the adapter gets to go on is the trigger. WD14 tag score is in each row label.
 
-**Matched recipe, matched coverage, each at its own best strength.** Base scores
-0.08. A matched LoRA reaches 0.70; GPart peaks at 0.57.
+**Character.** Base 0.08 → GPart all-linear at α 1.5: 0.57. Hair colour, eye
+colour and the accessories all come back from the trigger alone.
 
-![All four arms at p0](results/figures/readme/horizontal_alpha_sweep_top.jpg)
+![Character: base model vs GPart](results/figures/readme/showcase_character.jpg)
 
-**GPart's peak is bought, not free.** Going from α 1.3 to 1.5 buys +0.02 of tag
-score and costs a global colour cast; by α 1.8 the background smears and the
-composition distorts. The score rises while the images get worse — which is why
-the tag score alone is not a quality metric (`docs/02-results-character.md` §3).
+**Style.** The same matched recipe pointed at a style target instead of a
+character.
 
-![GPart strength sweep, α 1.3 to 1.8](results/figures/readme/horizontal_alpha_sweep_bottom.jpg)
+![Style: base model vs GPart](results/figures/readme/showcase_style.jpg)
 
-**The same pattern on a style task.** At comparable image displacement the LoRA
-rows hold edge energy near the base value of 0.028; the GPart rows fall to 0.020
-and 0.017, a 39% loss of high-frequency detail (`docs/03-results-style-stacking.md` §1).
-
-![Style task, four arms](results/figures/readme/horizontal_full_prompt_style.jpg)
+α 1.5 is GPart's peak, and it is paid for in image quality — see
+`docs/02-results-character.md` §3. These two sheets show the GPart arm only; the
+LoRA runs this comparison is measured against, and full-resolution versions of
+all five sheets, are in [`results/figures/`](results/figures/).
 
 ---
 

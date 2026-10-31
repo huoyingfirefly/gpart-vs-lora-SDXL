@@ -45,26 +45,22 @@ GPart 的 **1/33**。它不是在「同样的强度下输」，是在「几乎�
 
 ## 结果一览
 
-都用 `p0`（干净场景，只有 trigger token —— 有区分度的那个 prompt），从 6 个打分的
-seed 里取 3 个，每行左侧标注 WD14 tag score。全尺寸原图和这里没放的两张见
-[`results/figures/`](results/figures/)。
+GPart 取最优强度，和基模对比。prompt 用 `p0`（干净场景，只有 trigger token ——
+有区分度的那个 prompt），从 6 个打分的 seed 里取 3 个：也就是说 adapter 能依靠的
+只有那个 trigger。WD14 tag score 标在每行开头。
 
-**配方对齐、覆盖对齐、各自取各自的最优强度。** 底座 0.08，配方对齐的 LoRA 到
-0.70，GPart 见峰在 0.57。
+**角色。** 基模 0.08 → GPart 全参 α1.5：0.57。发色、瞳色、配饰，全都只靠 trigger
+就还原出来了。
 
-![四种配置在 p0 上的对比](results/figures/readme/horizontal_alpha_sweep_top.jpg)
+![角色：基模 vs GPart](results/figures/readme/showcase_character.jpg)
 
-**GPart 那个峰是用图像质量换来的。** α 从 1.3 提到 1.5，tag 分只多 0.02，代价是
-整幅偏色；到 α 1.8 背景糊掉、构图变形。分数在涨，图像在变差 —— 所以 tag 分数
-本身不是质量指标（`02-results-character.zh-CN.md` §3）。
+**画风。** 同一套对齐配方，目标从角色换成画风。
 
-![GPart 强度扫描，α 1.3 到 1.8](results/figures/readme/horizontal_alpha_sweep_bottom.jpg)
+![画风：基模 vs GPart](results/figures/readme/showcase_style.jpg)
 
-**画风任务上是同一个模式。** 在相近的图像位移下，LoRA 两行的边缘能量贴在 base 的
-0.028 附近，GPart 两行掉到 0.020 和 0.017，高频细节损失 39%
-（`03-results-style-stacking.zh-CN.md` §1）。
-
-![画风任务，四种配置](results/figures/readme/horizontal_full_prompt_style.jpg)
+α1.5 是 GPart 的峰值，这个峰值是用图像质量换来的 —— 见
+`02-results-character.zh-CN.md` §3。这两张只展示 GPart 这一条臂；作为对照的 LoRA
+结果，以及五张对比图的全尺寸版本，都在 [`results/figures/`](results/figures/)。
 
 ---
 
