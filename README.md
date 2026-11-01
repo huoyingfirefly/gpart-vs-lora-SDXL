@@ -28,6 +28,7 @@ That question has a reusable answer even if you disagree with our conclusion.
 | `src/sample.py` | deterministic sampler with adapter loading, α scaling, merging |
 | `src/eval/tag_eval.py` | booru-tagger scoring of character identity tags |
 | `src/eval/style_stats.py` | colour / texture statistics (dRGB, saturation, edge energy) |
+| `src/eval/boot_identity.py` | paired bootstrap on the identity score, so a two-arm gap comes with an interval |
 | `src/bench/` | per-step timing, parameter budget, cost-model calibration |
 | `src/figures/` | contact-sheet builders used for every figure in `results/` |
 | `docs/` | protocol, results, cost model, limitations, release checklist |
@@ -35,14 +36,29 @@ That question has a reusable answer even if you disagree with our conclusion.
 
 ## Headline result
 
-| | |
-|---|---|
-| Open-box comparison (each method's shipped recipe) | GPart 0.43 vs LoRA 0.05 |
-| **Matched recipe, matched coverage, each at its best strength** | **GPart 0.57 vs LoRA 0.70** |
+| comparison | identity | what it means |
+|---|---|---|
+| Open box, each method's shipped recipe | GPart 0.43 vs LoRA 0.05 | the shipped LoRA ran at lr 1e-4 and reached 1/33 of GPart's displacement — a recipe artifact |
+| Matched recipe, matched coverage, each at its own best strength, prompt `p0` | GPart 0.57 vs LoRA 0.70 | LoRA wins on the most structurally demanding prompt |
+| Same, on a four-framing holdout set, nominal α 1.0 | GPart 0.50 vs LoRA 0.55, 95% CI [−0.06, +0.18] | **a tie** |
+| Same, at exactly **equal displacement** (GPart α 0.88) | GPart 0.42 vs LoRA 0.50, 95% CI [−0.23, +0.06] | **a tie** |
+| Same, each at its own best strength on that set | GPart 0.63 vs LoRA 0.50, 95% CI [+0.03, +0.23] | GPart wins by using 1.8× the displacement |
 
-The open-box gap was a **learning-rate artifact**: the shipped LoRA ran at lr 1e-4
-and ended up with 1/33 of GPart's weight displacement. See `docs/01-protocol.md`
-for the exact controls and `docs/02-results-character.md` for the numbers.
+The open-box gap was a **learning-rate artifact**; the second row is a
+**prompt-set artifact** — see `docs/00-claims.md`, which splits every claim into
+"robust" and "conditional" for exactly this reason. `docs/01-protocol.md` has the
+exact controls and `docs/02-results-character.md` the numbers.
+
+What does **not** move under re-testing is the style side, and the reason is not
+the one the parameterization predicts:
+
+| | best alone | stacked with a character adapter |
+|---|---|---|
+| kohya style LoRA (rank 32, community-trained) | SWD **3.336** | 4.67 → 5.01 → 5.56 as α rises |
+| GPart style adapter | — | 3.59 – 3.71, flat |
+
+The style adapter that transfers best is the one that falls apart when composed.
+`docs/03-results-style-stacking.md` §5.
 
 ## Results at a glance
 
@@ -150,7 +166,7 @@ record for `src/sample.py` and is not read by the trainer — see `configs/READM
 │   ├── sample.py       sampling: adapter loading, α, merging, multi-prompt
 │   ├── data.py         kohya SDXL latent cache reader
 │   ├── prep/           caption_variants.py, convert_unet.py
-│   ├── eval/           tag_eval.py, style_stats.py, check_adapter.py
+│   ├── eval/           tag_eval.py, style_stats.py, boot_identity.py, check_adapter.py
 │   ├── bench/          bench_d.py, param_budget.py, profile_train_step.py
 │   └── figures/        contact-sheet builders for every figure
 ├── third_party/GPart/  vendored GPart/PEFT (Apache-2.0), patched — see THIRD_PARTY.md
@@ -172,11 +188,14 @@ Read `docs/00-claims.md` before citing anything. In short:
 - **One character, one style, one base model.** Not a general claim about
   low-rank vs full-rank PEFT.
 - **Not every knob was swept.** We swept strength (α / LoRA scale), layer
-  coverage, and training recipe. We did **not** sweep GPart's `d`, nor its
-  learning rate, nor LoRA's rank beyond r8. That last gap matters: we showed the
-  open-box result was an lr artifact by moving *LoRA* to GPart's lr, never by
-  moving *GPart* to another one. The strict form of the conclusion is "at
-  lr 5e-4 with everything else matched, LoRA does better".
+  coverage, prompt set, and training recipe. We did **not** sweep GPart's `d`,
+  nor its learning rate. LoRA rank was tested at r8 and r32 (the community
+  adapter), not in between. The lr gap matters: we showed the open-box result
+  was an lr artifact by moving *LoRA* to GPart's lr, never by moving *GPart* to
+  another one.
+- **A 0.13 difference in either direction is what changing the test set buys.**
+  The prompt set moved the identity gap 0.22 and stacking a style adapter moved
+  it 0.09. Quote an identity number together with its configuration.
 - **No text-encoder training.** The vendored GPart path only trains the UNet;
   LoRA could train the TE but did not in these runs.
 
@@ -225,7 +244,7 @@ license — see `THIRD_PARTY.md`. No model weights, latent caches or source imag
 are included.
 
 `results/figures/` contains generated contact sheets showing characters derived
-from third-party artwork. **They are pending an IP check** — see
-`docs/06-release-checklist.md` §1. If that check is not cleared, delete
-`results/figures/` and ship the tables alone; the comparison does not depend on a
-reader seeing the images, though its persuasiveness does.
+from third-party artwork. `docs/06-release-checklist.md` §1 records the
+considerations; the maintainer's decision is to ship them, and a reuser who needs
+a different call can drop `results/figures/` — the comparison does not depend on
+a reader seeing the images, though its persuasiveness does.

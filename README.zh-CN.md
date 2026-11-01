@@ -27,6 +27,7 @@
 | `src/sample.py` | 确定性采样：加载适配器、α 缩放、合并、多提示词 |
 | `src/eval/tag_eval.py` | 用 booru tagger 给角色特征标签打分 |
 | `src/eval/style_stats.py` | 色彩 / 纹理统计（dRGB、饱和度、边缘能量） |
+| `src/eval/boot_identity.py` | 身份分数的配对 bootstrap，给两臂差距一个置信区间 |
 | `src/bench/` | 步时测量、参数预算、成本模型标定 |
 | `src/figures/` | `results/` 里每一张对比图的拼图脚本 |
 | `docs/` | 协议 → 结果 → 成本 → 局限 → 发布前核查 |
@@ -34,14 +35,26 @@
 
 ## 一句话结果
 
-| | |
-|---|---|
-| 开箱对比（各自官方的训练配方） | GPart 0.43 vs LoRA 0.05 |
-| **配方对齐、覆盖对齐、各自取最优强度** | **GPart 0.57 vs LoRA 0.70** |
+| 对比 | 身份 | 说明 |
+|---|---|---|
+| 开箱，各自官方配方 | GPart 0.43 vs LoRA 0.05 | 官方 LoRA 配 lr 1e-4，位移只有 GPart 的 1/33 —— 配方产物 |
+| 配方对齐、覆盖对齐、各自取最优强度，prompt `p0` | GPart 0.57 vs LoRA 0.70 | LoRA 在结构性要求最高的那个 prompt 上赢 |
+| 同上，四景别留出集，名义 α 1.0 | GPart 0.50 vs LoRA 0.55，95% CI [−0.06, +0.18] | **打平** |
+| 同上，**严格等位移量**（GPart α 0.88） | GPart 0.42 vs LoRA 0.50，95% CI [−0.23, +0.06] | **打平** |
+| 同上，各自取最优强度 | GPart 0.63 vs LoRA 0.50，95% CI [+0.03, +0.23] | GPart 靠 1.8 倍位移赢 |
 
-开箱那个差距是**学习率造成的**：官方 LoRA 配的是 lr 1e-4，训完的权重位移只有
-GPart 的 **1/33**。它不是在「同样的强度下输」，是在「几乎没动」的状态下被拿去比。
-具体对齐了哪些变量见 `docs/01-protocol.md`，数字见 `docs/02-results-character.md`。
+开箱那个差距是**学习率造成的**；第二行那个是 **prompt 集造成的**。这正是
+`docs/00-claims.md` 把主张拆成「稳」和「有条件」两栏的原因。
+对齐了哪些变量见 `docs/01-protocol.md`，数字见 `docs/02-results-character.md`。
+
+重新测也不动的是画风那一侧，而且原因不是参数化理论预料的那个：
+
+| | 单挂最好 | 叠角色 adapter |
+|---|---|---|
+| kohya 画风 LoRA（rank 32，社区训） | SWD **3.336** | α 越大越差：4.67 → 5.01 → 5.56 |
+| GPart 画风 adapter | — | 3.59 – 3.71，基本不动 |
+
+**画风学得最好的那个，叠起来最差。** 见 `docs/03-results-style-stacking.zh-CN.md` §5。
 
 ## 结果一览
 
@@ -147,7 +160,7 @@ python -m src.eval.tag_eval --model /path/to/wd14/model.onnx \
 │   ├── sample.py       采样：加载适配器、α、合并、多提示词
 │   ├── data.py         kohya SDXL latent 缓存读取
 │   ├── prep/           caption_variants.py、convert_unet.py
-│   ├── eval/           tag_eval.py、style_stats.py、check_adapter.py
+│   ├── eval/           tag_eval.py、style_stats.py、boot_identity.py、check_adapter.py
 │   ├── bench/          bench_d.py、param_budget.py、profile_train_step.py
 │   └── figures/        所有对比图的拼图脚本
 ├── third_party/GPart/  内置的 GPart/PEFT（Apache-2.0），有改动 —— 见 THIRD_PARTY.md
@@ -167,10 +180,12 @@ python -m src.eval.tag_eval --model /path/to/wd14/model.onnx \
 完整清单在 `docs/00-claims.md`。简版：
 
 - **一个角色、一种画风、一个底模。** 这不是关于「低秩 vs 满秩 PEFT」的一般性结论。
-- **不是所有旋钮都扫过。** 扫了强度（α / LoRA scale）、层覆盖、训练配方；
-  **没扫** GPart 的 `d`、**没扫** GPart 的学习率、LoRA 的 rank 也只到 r8。
-  特别是最后两条：我们证明了「开箱差距来自 lr」，靠的是把 *LoRA* 挪到 GPart 的 lr，
-  从没把 *GPart* 挪到别的 lr。严格的表述只能是「在 lr 5e-4、其余全对齐时，LoRA 更好」。
+- **不是所有旋钮都扫过。** 扫了强度（α / LoRA scale）、层覆盖、prompt 集、训练配方；
+  **没扫** GPart 的 `d`、**没扫** GPart 的学习率；LoRA rank 测了 r8 和 r32（社区那个），
+  中间没测。lr 那条最要紧：我们证明了「开箱差距来自 lr」，靠的是把 *LoRA* 挪到
+  GPart 的 lr，从没把 *GPart* 挪到别的 lr。
+- **0.13 的差距，无论朝哪边，都只是换测试集能换出来的量。** 换 prompt 集让身份差距
+  摆了 0.22，叠一个画风 adapter 再摆 0.09。引用身份数字时请连配置一起引。
 - **没训 text encoder。** 内置的 GPart 路径只能训 UNet；LoRA 能训 TE，但这批实验里也没训。
 - **「训练慢 4 倍」说的是本仓库的 `stateless` 后端**，不是 GPart 这个方法。
   详见 `docs/04-cost-model.md`。
@@ -213,6 +228,7 @@ adapter、checkpoint、强度/α、target module 等）保留英文原词，不�
 代码 Apache-2.0（见 `LICENSE`）。内置的 GPart/PEFT 保留原许可证 —— 见 `THIRD_PARTY.md`。
 不含任何模型权重、latent 缓存或原始训练图片。
 
-`results/figures/` 里是生成的对比图，图中角色衍生自第三方作品，**版权尚未核实** ——
-见 `docs/06-release-checklist.md` §1。如果核不掉，删掉 `results/figures/` 只发数据表：
-对比结论不依赖读者看见图，但说服力依赖。
+`results/figures/` 里是生成的对比图，图中角色衍生自第三方作品。
+`docs/06-release-checklist.md` §1 记录了相关的考量；维护者决定照发。
+需要另做判断的复用者可以删掉 `results/figures/` 只发数据表：对比结论不依赖读者看见图，
+但说服力依赖。

@@ -66,6 +66,11 @@ Useful ones if you want to see the exact command behind a row:
 | `sweep_gp_char_2026-11-01.sh` | the α 1.0/1.3/1.5/1.8 sweep |
 | `exposure_curve_2026-10-31.sh` | the step curve (400/600/800/1200) |
 | `final_test_2026-10-30.sh` | the run that produced the headline tables |
+| `stylechar_sweep4_2026-11-01.sh` | the four-framing holdout sweep (`results/tables/holdout_three_family.csv`) |
+| `stylechar_kohya_2026-11-01.sh` | the kohya style-LoRA arms on the same holdout set |
+| `stylechar_charalpha_2026-11-01.sh` | the GPart character α sweep inside the stack |
+| `stylechar_charsolo_2026-11-01.sh` | character adapters alone, to separate prompt-set from stacking effects |
+| `stylechar_round2_2026-11-02.sh` | solo style arms + the all-linear GPart style stack |
 
 ## Still missing
 

@@ -1,0 +1,13 @@
+arm,family,style_adapter,style_alpha,char_adapter,char_alpha,dW_style,dW_char,identity,kept,mean_z,swd
+base,-,-,-,-,-,0,0,0.02,10/12,1.459,8.711
+gpart_stack,gpart,gpart_style_attn2,0.469,gpart_char_attn2,1.3,44.2,101.9,0.63,12/12,0.408,3.713
+gpart_stack_a088,gpart,gpart_style_attn2,0.469,gpart_char_attn2,0.88,44.2,68.8,0.42,12/12,0.480,3.658
+gpart_stack_a100,gpart,gpart_style_attn2,0.469,gpart_char_attn2,1.0,44.2,78.4,0.54,12/12,0.475,3.901
+gpart_stack_a160,gpart,gpart_style_attn2,0.469,gpart_char_attn2,1.6,44.2,125.4,0.56,12/12,0.434,3.569
+hybrid_gpstyle_lochar,hybrid,gpart_style_attn2,0.469,lora_char_matched,1.0,44.2,68.8,0.50,12/12,0.575,3.585
+hybrid_kohstyle_gpchar,hybrid,kohya_style_v3,1.0,gpart_char_attn2,1.3,6.50,101.9,0.52,12/12,0.530,5.103
+lora_stack_koh100,lora,kohya_style_v3,1.0,lora_char_matched,1.0,6.50,68.8,0.57,12/12,0.652,4.666
+lora_stack_koh150,lora,kohya_style_v3,1.5,lora_char_matched,1.0,9.75,68.8,0.47,12/12,0.583,5.011
+lora_stack_koh200,lora,kohya_style_v3,2.0,lora_char_matched,1.0,13.00,68.8,0.47,12/12,0.726,5.559
+lora_stack_r8,lora,lora_style_matched_r8,0.469,lora_char_matched,1.0,44.2,68.8,0.50,12/12,0.721,4.863
+kohya_style_solo,solo,kohya_style_v3,1.5,-,-,9.75,0,-,12/12,0.616,3.336

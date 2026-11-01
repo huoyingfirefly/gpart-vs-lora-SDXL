@@ -87,6 +87,26 @@ Prompts: `p0` (clean scene, trigger only — the discriminating prompt) and `p1`
 (full description — everything the adapter should supply is spelled out, so it
 measures almost nothing about the adapter). Report on `p0`.
 
+`p0` is also the most structurally demanding prompt in the set (full body,
+standing, crowd in the background), which is why §`02` §5 adds a **four-framing
+holdout set** — close-up, wide rooftop, medium/train, from-behind, 3 seeds each:
+
+```
+h0  upper body, close-up, looking at viewer, indoors, cafe, night, warm lamp light
+h1  wide shot, full body, standing, from side, outdoors, rooftop, sunset
+h2  medium shot, sitting, hugging knees, indoors, train interior, dusk light
+h3  full body, walking, from behind, outdoors, rainy street, neon reflections, night
+```
+
+(each prefixed with `r1999style, aima, 1girl, solo,` and suffixed with the quality
+tags; full text in `configs/prompts/holdout4.jsonl`)
+
+`h0`–`h3` span the range where an identity adapter has little to do (`h0`) to
+where it has a lot (`h3`, where two of the ten tags — `red_eyes`, `choker` — are
+structurally invisible and the ceiling is 0.8 rather than 1.0). Any identity
+number quoted without naming its prompt set is a number for whichever set the
+author happened to use; the two agree on direction only for `p0`.
+
 **Style / image change** — against the same seed with no adapter:
 
 ```

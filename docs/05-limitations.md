@@ -43,6 +43,18 @@ wins". A GPart run that does better at 1e-3 is not excluded.
   `dRGB`/`S`/`edge` row and the images.
 - **No perceptual / feature-space metrics.** No CLIP, DINO, or LPIPS distance, no
   human preference study. The image statistics are cheap proxies.
+- **The two style metrics disagree, at the same magnitude as the effects.**
+  `|z|` (whole-image colour) and `SWD` (patch-level texture) rank the same arms
+  differently — `03-results-style-stacking.md` §5. Neither is a ground truth, so
+  a claim resting on one of them alone is a claim about that metric.
+- **The style metrics are framing-sensitive.** Cropping 65% of an image moves
+  `|z|` by 0.8–2.4, which is larger than the gap between most arms. The content
+  gate (WD14 `1girl` ≥ 0.5) removes the worst failure — an empty image scoring as
+  a perfect style match — but not framing sensitivity.
+- **The identity metric is prompt-dependent, and the dependence is large.**
+  Changing the prompt set moves it 0.22; stacking a style adapter moves it 0.09
+  (`02-results-character.md` §5). It is a measurement of a configuration, not of
+  a method.
 - **Threshold sensitivity.** Tag hits use p ≥ 0.35 with no sensitivity analysis.
   A different threshold would move every absolute number; the base row anchors
   the comparison.
@@ -77,8 +89,17 @@ wins". A GPart run that does better at 1e-3 is not excluded.
 - The step curve uses `n = 3` at 400/600/800; differences between those three
   points are within noise and are not read as a curve (only the 800 vs 400
   accessory gap is robust, and it is large).
-- No confidence intervals are reported for the tag scores. Treat ±0.05 as noise
-  and do not over-read 0.55 vs 0.57.
+- **The four-framing holdout set is 12 images per arm** (4 prompts × 3 seeds).
+  Paired bootstrap over those cells puts the 95% interval of a 0.05–0.13 identity
+  difference across zero, and of a 0.13 difference barely outside it. Do not read
+  a 0.05 gap between arms as a result at this `n`.
+- **Confidence intervals are reported only where they were computed** — the
+  identity comparisons in `02-results-character.md` §5. The tables from `p0`
+  alone (`n = 6`) have none; treat ±0.05 as noise and do not over-read 0.55 vs
+  0.57.
+- **No per-arm image counts were increased for the style metrics.** 12 images is
+  thin for a Wasserstein distance over patch clouds; the `SWD` ordering between
+  adjacent arms is within its own sampling noise.
 
 ## 6. Reproducibility
 
@@ -89,6 +110,17 @@ wins". A GPart run that does better at 1e-3 is not excluded.
 - The sampler must use `trailing` spacing. `leading` (the diffusers default for
   many schedulers) produces visibly different images at the same settings and
   will not reproduce these numbers.
+- **Prompts longer than 77 CLIP tokens must be chunked, not truncated.** Until
+  this was fixed, `src/sample.py` used `truncation=True` and silently dropped
+  everything past token 77. ComfyUI and A1111 encode consecutive 77-token
+  windows instead. Any result produced by this repo before the fix that used a
+  detailed prompt is a result for a shorter prompt than the one printed. The
+  chunking path now in `src/sample.py` returns identical embeddings for prompts
+  that already fit in one window, so short-prompt numbers are unaffected.
+- The community kohya style LoRA (`reserve1999_style_v3`, rank 32) is an external
+  download and is not redistributed here. Its `‖ΔW‖` and module list are recorded
+  in `results/tables/holdout_three_family.csv`; its identity could not be pinned
+  to a specific training run beyond the metadata it ships with.
 
 ## 7. What a fair referee would say
 

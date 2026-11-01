@@ -110,7 +110,62 @@ Practical consequence: **800 steps is the cheapest budget that preserves
 accessories.** (The 400/600/800 points differ by less than their `n = 3` noise —
 do not read the ordering between them as a curve.)
 
-## 5. Images
+## 5. The identity gap is prompt-dependent, and at equal displacement it is zero
+
+Everything above is measured on `p0` alone. Repeating §3's comparison on four
+different framings, 3 seeds each (12 images per arm, same adapters, same
+`‖ΔW‖` at nominal α 1.0 — 68.8 vs 78.4):
+
+| | framing | LoRA @1.0 | GPart @1.0 |
+|---|---|---|---|
+| h0 | close-up | 0.77 | 0.70 |
+| h1 | wide rooftop | 0.47 | 0.40 |
+| h2 | medium / train | 0.67 | 0.53 |
+| h3 | from behind | 0.30 | 0.37 |
+| | **mean** | **0.55** | **0.50** |
+
+Paired bootstrap over the 12 (prompt, seed) cells, 4000 resamples:
+**+0.050, 95% CI [−0.058, +0.175]** — not distinguishable from zero. Per
+framing, every CI also crosses zero (`scripts/boot_identity_2026-11-02.py`).
+
+So §3's 0.27 gap is `p0`. `p0` is `full body, standing, from front, … crowd in
+background` — the most structurally demanding prompt in the set. LoRA covers
+attn1 + FFN, which carries spatial structure; GPart covers attn2 only, which
+modulates prompt injection. **The more a prompt constrains composition, the more
+LoRA wins.** On a close-up with nothing to compose, the two tie.
+
+### The strength ceiling is asymmetric
+
+Both methods are exactly linear in α (`ΔW` scales with the LoRA scale, and
+`ΔW = P·diag(s)·(αθ)` for GPart). The optimum is not:
+
+| GPart char α | ‖ΔW‖ | identity (stacked on GPart style @0.469) |
+|---|---|---|
+| 0.88 | 68.8 | 0.42 |
+| 1.0 | 78.4 | 0.54 |
+| **1.3** | 101.9 | **0.63** |
+| 1.6 | 125.4 | 0.56 |
+
+LoRA peaks at 1.0 and degrades at 1.5 and 2.0; GPart peaks at 1.3–1.6. Since both
+are linear in their scale parameter, that asymmetry is a property of the two
+`ΔW` **directions** — LoRA's has components that turn destructive when amplified,
+GPart's sparse attn2-only support has fewer. It means "each at its own optimum"
+is not a neutral comparison:
+
+- **equal displacement** (GPart @0.88 vs LoRA @1.0, ‖ΔW‖ 68.8 both): GPart 0.417
+  vs LoRA 0.500, GPart − LoRA = −0.083, CI [−0.225, +0.058] — **no difference**.
+- **each at its own optimum** (GPart @1.3, 1.8× the displacement): GPart 0.633
+  vs LoRA 0.500, GPart − LoRA = +0.133, CI [+0.025, +0.233] — **GPart ahead**.
+
+Which one is "right" depends on the question. For "which parameterization carries
+more identity per unit of weight change", this is a tie. For "which adapter
+should I ship at its best setting", GPart's ability to absorb more displacement
+is a real asset.
+
+`results/tables/holdout_three_family.csv` has the full three-family table these
+rows come from (§`03` §5).
+
+## 6. Images
 
 | figure | shows |
 |---|---|
@@ -121,11 +176,14 @@ do not read the ordering between them as a curve.)
 Compare the α 1.5 and 1.8 rows in the bottom sheet against the α 1.0 row in the
 top sheet before accepting the 0.57 peak number.
 
-## 6. Caveats specific to this task
+## 7. Caveats specific to this task
 
 - One character. A second character (`juxueli`, same acquisition pipeline) is in
   progress as a single-arm replication — it can check that GPart learns another
   character at all, but it will **not** carry a GPart-vs-LoRA conclusion.
+- **The identity score is not a stable ranking.** It moves 0.22 when the prompt
+  set changes and another 0.09 when a style adapter is stacked (§5). Any single
+  number quoted from this doc is a number *for a configuration*, not for a method.
 - The tag set is 10 tags chosen by caption frequency and checked for base
   discrimination; a different tag set would move the absolute scores. The base
   row is the anchor.

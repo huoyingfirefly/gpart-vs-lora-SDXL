@@ -12,6 +12,11 @@ Done:
 - `--config` two-phase parse in `src/train.py`, so `configs/*.yaml` are live
   defaults rather than documentation
 - figure renames per §3, plus `results/tables/` (csv + md)
+- 2026-11-02: the four-framing holdout sweep and the kohya baseline —
+  `configs/prompts/holdout4.jsonl`, `results/tables/holdout_three_family.{csv,md}`,
+  `src/eval/boot_identity.py`, and the `scripts/history/stylechar_*.sh` run logs.
+  `src/sample.py` also gained ComfyUI-style prompt chunking (it used to truncate
+  at 77 tokens).
 - `third_party/GPart/data/math_eval/` deleted (8.9 MB of the paper's math
   benchmark, irrelevant here)
 - `scripts/history/` populated as the audit trail

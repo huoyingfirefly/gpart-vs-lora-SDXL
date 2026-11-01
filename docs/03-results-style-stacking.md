@@ -97,16 +97,117 @@ None of that was implemented in this repo. The table above is plain `ΔW₁ + Δ
 for both methods, which is the one composition operation where LoRA's cross terms
 do not matter. So:
 
-- ✅ We can say: plain additive stacking shows no GPart advantage on these tasks.
+- ✅ We can say: plain additive stacking shows no GPart advantage **on the
+  dRGB/saturation/edge family of metrics** (§1–§2). On a style-*match* metric it
+  does, and that is §5 — read them together before quoting either.
 - ❌ We cannot say: GPart is not a better composition base. That hypothesis is
   untested here, and it remains the most plausible place for GPart's structural
   advantage to show up.
 
 See `00-claims.md`, "claims we do NOT make", row 4.
 
-## 4. Figures
+## 4. From "how much changed" to "did it move toward the target"
+
+Every metric in §1–§3 is relative to the *same seed with no adapter*. That makes
+them control variables, not scores: `dRGB` says an image changed, `S` and `edge`
+say how the change is distributed, and none of them knows what the target style
+looks like. A style adapter can produce a large, detail-preserving, entirely
+wrong change and score well on all three.
+
+Answering "did it move toward the style" needs a reference set — the style's own
+source images — and a distance to it. §5 adds two such distances and re-runs the
+stacking comparison with them, which is where the strongest result in this
+document comes from.
+
+## 5. Three families, a style-*match* metric, and the composability difference
+
+§1–§2 use `dRGB`, `S` and `edge`, which measure *how much* changed and whether
+detail survived. They do not measure whether the image moved **toward the
+target style**. Adding that measurement, and swapping in a community-trained
+LoRA as the mainstream baseline, changes part of the picture.
+
+### The baseline, and why "our LoRA was too small" is not the explanation
+
+| | modules | attn1 | attn2 | FFN | rank | ‖ΔW‖ |
+|---|---|---|---|---|---|---|
+| self-trained r8 (matched) | 700 | 280 | 280 | 140 | 8 | 44.2 |
+| kohya `reserve1999_style_v3` | 722 | 280 | 280 | 140 | 32 | **6.50** |
+
+Same dataset (`6_reserve1999`), same trigger, same base model, kohya sd-scripts,
+1310 steps, lr 1e-4. Nearly identical module coverage (722 vs 700), and the
+self-trained adapter carries **6.8× the displacement** — yet the kohya one is the
+better style adapter. Coverage and magnitude are both falsified as explanations
+for why the self-trained LoRA underperformed; only the direction of the update
+differs.
+
+### Style match on a four-framing holdout set
+
+`|z|` = mean absolute z-score over six whole-image colour statistics against the
+style's own reference set; `SWD` = sliced Wasserstein distance between 32×32
+Oklab patch clouds. Both are gated on WD14 `1girl` ≥ 0.5 so an image that lost
+its subject cannot score well by being empty. Lower is better. 12 images per arm.
+
+| arm | identity | \|z\| | SWD |
+|---|---|---|---|
+| base, no adapter | 0.02 | 1.459 | 8.711 |
+| **GPart style @0.469 + GPart char @1.3** | **0.63** | **0.408** | 3.713 |
+| GPart style @0.469 + LoRA char @1.0 | 0.50 | 0.575 | **3.585** |
+| kohya style @1.0 + GPart char @1.3 | 0.52 | 0.530 | 5.103 |
+| kohya style @1.0 + LoRA char @1.0 | 0.57 | 0.652 | 4.666 |
+| kohya style @1.5 + LoRA char @1.0 | 0.47 | 0.583 | 5.011 |
+| kohya style @2.0 + LoRA char @1.0 | 0.47 | 0.726 | 5.559 |
+| self-trained style r8 @0.469 + LoRA char @1.0 | 0.50 | 0.721 | 4.863 |
+| *reference: kohya style @1.5 alone, no character* | — | 0.616 | **3.336** |
+
+Two things to notice before reading a winner out of it:
+
+1. **`|z|` and `SWD` disagree.** `|z|` ranks the pure-GPart stack first by a wide
+   margin; `SWD` puts the hybrid first and GPart second. The gap between metric
+   families is the same size as the gap between arms, so neither ranking is a
+   result on its own — quote both or neither.
+2. **The identity column is not a ranking** — at equal displacement the two
+   character adapters are statistically indistinguishable (`02` §5).
+
+### The composability difference
+
+The row that does not depend on which style metric you prefer is the *reference*
+row, and its comparison against the stacked rows:
+
+```
+kohya style alone            SWD 3.336   ← best style number in the whole table
+kohya style + LoRA char      SWD 4.666 (α1.0) / 5.011 (α1.5) / 5.559 (α2.0)
+kohya style + GPart char     SWD 5.103
+GPart style + LoRA char      SWD 3.585
+GPart style + GPart char     SWD 3.713
+```
+
+The kohya style adapter is the **best alone** and the **worst stacked**, and it
+gets worse monotonically as its α rises. The GPart style adapter stays at
+3.59–3.71 against every character adapter tried, including one from the other
+family. (Its own solo SWD is not in this table — the solo-style arms were run on
+a separate prompt set and are not comparable to these rows.)
+
+**Hypothesis (untested):** kohya is dense rank-32 over attn1 + attn2 + FFN, and
+the character LoRA occupies the same module set, so the two low-rank increments
+compete for the same directions. GPart is attn2-only with a sparse 50 M support,
+overlapping the character LoRA's support much less.
+
+This hypothesis has not been tested against alternatives — for instance, that the
+kohya adapter is simply saturated at the α we stacked it at, or that its training
+data overlaps the character images. Until one of those is excluded, the honest
+form is: **we found a concrete pair of adapters where the GPart one composes and
+the LoRA one does not.** That is a fact about those two files, not yet about the
+two parameterizations.
+
+Full table: `results/tables/holdout_three_family.csv`.
+
+## 6. Figures
 
 | figure | shows |
 |---|---|
 | `results/figures/horizontal_full_prompt_style.png` | style rows at the full prompt |
 | `results/figures/horizontal_stacking_p0.png` | base / kohya stack / matched stack / both GPart stacks |
+
+The four-framing holdout arms have no contact sheet in `results/figures/` — they
+were scored from the working tree. `scripts/history/stylechar_*.sh` regenerates
+them; `results/tables/holdout_three_family.{csv,md}` holds every number.

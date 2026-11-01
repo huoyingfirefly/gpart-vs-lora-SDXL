@@ -86,6 +86,24 @@ adapter）是地板；读差值，不要读绝对值。
 prompt：`p0`（干净场景，只有 trigger —— 有区分度的那个 prompt）与 `p1`（完整描述
 —— 该由 adapter 提供的一切都被写明了，所以它几乎测不到 adapter）。结论报在 `p0` 上。
 
+`p0` 同时也是这组里结构性要求最高的 prompt（全身、站立、背景人群），所以 §`02` §5
+补了一个**四景别留出集** —— 近景 / 大远景 / 中景 / 背面，各 3 个 seed：
+
+```
+h0  upper body, close-up, looking at viewer, indoors, cafe, night, warm lamp light
+h1  wide shot, full body, standing, from side, outdoors, rooftop, sunset
+h2  medium shot, sitting, hugging knees, indoors, train interior, dusk light
+h3  full body, walking, from behind, outdoors, rainy street, neon reflections, night
+```
+
+（每句前面都带 `r1999style, aima, 1girl, solo,`，后面带质量 tag；完整文本见
+`configs/prompts/holdout4.jsonl`）
+
+`h0`–`h3` 覆盖了「身份 adapter 几乎无事可做」（`h0`）到「事情最多」（`h3`）这一整段，
+后者十个 tag 里有 `red_eyes`、`choker` 两个结构性看不见，天花板是 0.8 不是 1.0。
+**不写清楚 prompt 集就引用的身份数字，是「作者碰巧用了哪一套」的数字**；
+两套只在 `p0` 这种 prompt 上方向一致。
+
 **画风 / 图像变化** —— 对同一 seed、不带 adapter 的那张图：
 
 ```

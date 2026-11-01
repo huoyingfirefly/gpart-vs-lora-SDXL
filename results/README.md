@@ -11,6 +11,7 @@ if they ever disagree, the docs are wrong and this table is right.
 | `character.{csv,md}` | every character row: recipe, coverage, α, ‖ΔW‖, RMS, score | `docs/02-results-character.md` |
 | `style.{csv,md}` | dRGB / S / V / edge for the five style rows | `docs/03-results-style-stacking.md` §1 |
 | `stacking.{csv,md}` | character score + image stats for the four stacking rows | `docs/03-results-style-stacking.md` §2 |
+| `holdout_three_family.{csv,md}` | 12 arms on the four-framing holdout set: identity, `\|z\|`, SWD, ‖ΔW‖ per adapter | `docs/02-results-character.md` §5, `docs/03-results-style-stacking.md` §5 |
 | `step_curve.{csv,md}` | score by checkpoint step, with the accessory tags | `docs/02-results-character.md` §4 |
 | `cost.{csv,md}` | seconds/step per adapter configuration | `docs/04-cost-model.md` §2 |
 | `partition_bench.{csv,md}` | the partition-pass micro-benchmark | `docs/04-cost-model.md` §3 |
@@ -34,8 +35,9 @@ with no LoRA rows. They are cropped out of the sheets above and re-composited by
 `src/figures/readme_sheet.py` at 1000 px JPEG; regenerate with that script rather
 than editing the files.
 
-**These are the files to remove if the character IP is not cleared** — see
-`docs/06-release-checklist.md` §1. That includes `readme/`, which is more
+These are the files a reuser who needs a different licensing call would remove
+first — `docs/06-release-checklist.md` §1 records the considerations and the
+maintainer's decision to ship them. That includes `readme/`, which is more
 exposed than the rest because the README is the first thing a visitor sees.
 
 ## `logs/`

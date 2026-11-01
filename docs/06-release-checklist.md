@@ -8,6 +8,11 @@ and 2 can block publication entirely.
 The source images for `aima` and `reserve1999` are third-party artwork, and the
 characters may belong to a rights-holder.
 
+> **Status: not pursued by choice.** The maintainer's decision is to ship the
+> figures as they are. The items below are kept so a reuser can see what the
+> considerations are and make their own call — they are not pending work on this
+> repo.
+
 - [ ] Identify the origin of the `aima` character (design, franchise). If the
       design is from a commercial/gacha property, publish **no images** derived
       from it, or publish only heavily degraded thumbnails for illustration.

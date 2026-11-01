@@ -98,19 +98,52 @@ class Encoder:
         self.tok2 = CLIPTokenizer.from_pretrained(aux / "text_encoder_2", local_files_only=True)
         self.device = device
 
+    @staticmethod
+    def _chunk_ids(tok, text: str) -> list[list[int]]:
+        """Split text into 75-token bodies, one 77-token window each.
+
+        CLIPTokenizer(max_length=77, truncation=True) silently drops everything
+        past 77 tokens. ComfyUI and A1111 do not: they encode consecutive
+        77-token windows and concatenate the hidden states along the sequence
+        axis, so a long prompt stays long. Truncating made this sampler
+        disagree with ComfyUI exactly when the prompt is detailed enough to
+        matter -- which is the case every character test cares about.
+
+        A prompt that already fits in one window produces embeddings identical
+        to the old truncating path, so short-prompt results are unaffected.
+        """
+        ids = tok(text, truncation=False, padding=False).input_ids
+        body = ids[1:-1]  # BOS/EOS are re-added per window
+        if not body:
+            return [[tok.bos_token_id, tok.eos_token_id]]
+        return [[tok.bos_token_id, *body[i:i + 75], tok.eos_token_id]
+                for i in range(0, len(body), 75)]
+
+    @staticmethod
+    def _pad(tok, ids: list[int]) -> torch.Tensor:
+        pad = tok.pad_token_id if tok.pad_token_id is not None else tok.eos_token_id
+        return torch.tensor([ids + [pad] * (77 - len(ids))])
+
     def encode(self, text: str) -> tuple[torch.Tensor, torch.Tensor]:
-        ids1 = self.tok1(text, padding="max_length", max_length=77, truncation=True,
-                         return_tensors="pt").input_ids.to(self.device)
-        ids2 = self.tok2(text, padding="max_length", max_length=77, truncation=True,
-                         return_tensors="pt").input_ids.to(self.device)
+        chunks1 = self._chunk_ids(self.tok1, text)
+        chunks2 = self._chunk_ids(self.tok2, text)
+        if len(chunks1) != len(chunks2):
+            raise ValueError(f"tokenizers disagree on chunk count for {text!r}")
+        hs1, hs2, proj = [], [], None
         with torch.no_grad():
-            o1 = self.te1(ids1, output_hidden_states=True, return_dict=True)
-            o2 = self.te2(ids2, output_hidden_states=True, return_dict=True)
-            h1 = o1.hidden_states[11]
-            h2 = o2.hidden_states[-2]
-            # sd-scripts pools at the EOS token itself, not at argmax(input_ids)
-            eos_idx = int((ids2[0] == self.tok2.eos_token_id).nonzero()[0])
-            proj = o2.last_hidden_state[0, eos_idx] @ self.te2.text_projection.weight.T
+            for c1, c2 in zip(chunks1, chunks2):
+                ids1 = self._pad(self.tok1, c1).to(self.device)
+                ids2 = self._pad(self.tok2, c2).to(self.device)
+                o1 = self.te1(ids1, output_hidden_states=True, return_dict=True)
+                o2 = self.te2(ids2, output_hidden_states=True, return_dict=True)
+                hs1.append(o1.hidden_states[11])
+                hs2.append(o2.hidden_states[-2])
+                # sd-scripts pools at the EOS token itself, not at argmax(input_ids).
+                # With several windows this is the EOS of the last one.
+                eos_idx = int((ids2[0] == self.tok2.eos_token_id).nonzero()[0])
+                proj = o2.last_hidden_state[0, eos_idx] @ self.te2.text_projection.weight.T
+            h1 = torch.cat(hs1, dim=1)
+            h2 = torch.cat(hs2, dim=1)
         return torch.cat([h1, h2], dim=-1).float(), proj.unsqueeze(0).float()
 
     def to_cpu(self) -> None:
