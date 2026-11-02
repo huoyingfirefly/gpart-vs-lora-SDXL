@@ -11,7 +11,7 @@ if they ever disagree, the docs are wrong and this table is right.
 | `character.{csv,md}` | every character row: recipe, coverage, α, ‖ΔW‖, RMS, score | `docs/02-results-character.md` |
 | `style.{csv,md}` | dRGB / S / V / edge for the five style rows | `docs/03-results-style-stacking.md` §1 |
 | `stacking.{csv,md}` | character score + image stats for the four stacking rows | `docs/03-results-style-stacking.md` §2 |
-| `holdout_three_family.{csv,md}` | 12 arms on the four-framing holdout set: identity, `\|z\|`, SWD, ‖ΔW‖ per adapter | `docs/02-results-character.md` §5, `docs/03-results-style-stacking.md` §5 |
+| `holdout_three_family.{csv,md}` | 18 arms on the four-framing holdout set: identity, `\|z\|`, SWD, ‖ΔW‖ per adapter | `docs/02-results-character.md` §5, `docs/03-results-style-stacking.md` §5 |
 | `step_curve.{csv,md}` | score by checkpoint step, with the accessory tags | `docs/02-results-character.md` §4 |
 | `cost.{csv,md}` | seconds/step per adapter configuration | `docs/04-cost-model.md` §2 |
 | `partition_bench.{csv,md}` | the partition-pass micro-benchmark | `docs/04-cost-model.md` §3 |

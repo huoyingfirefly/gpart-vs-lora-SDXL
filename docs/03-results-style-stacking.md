@@ -152,12 +152,18 @@ its subject cannot score well by being empty. Lower is better. 12 images per arm
 | base, no adapter | 0.02 | 1.459 | 8.711 |
 | **GPart style @0.469 + GPart char @1.3** | **0.63** | **0.408** | 3.713 |
 | GPart style @0.469 + LoRA char @1.0 | 0.50 | 0.575 | **3.585** |
+| GPart style all-linear @0.782 + GPart char @1.3 | 0.59 | 0.593 | 4.885 |
+| GPart style all-linear @1.0 + GPart char @1.3 | 0.57 | 0.594 | 4.897 |
+| GPart style all-linear @1.668 + GPart char @1.3 | 0.47 | 0.803 | 5.158 |
 | kohya style @1.0 + GPart char @1.3 | 0.52 | 0.530 | 5.103 |
 | kohya style @1.0 + LoRA char @1.0 | 0.57 | 0.652 | 4.666 |
 | kohya style @1.5 + LoRA char @1.0 | 0.47 | 0.583 | 5.011 |
 | kohya style @2.0 + LoRA char @1.0 | 0.47 | 0.726 | 5.559 |
 | self-trained style r8 @0.469 + LoRA char @1.0 | 0.50 | 0.721 | 4.863 |
 | *reference: kohya style @1.5 alone, no character* | — | 0.616 | **3.336** |
+| *reference: kohya style @1.0 alone, no character* | — | 0.811 | 4.008 |
+| *reference: GPart style attn2 @0.469 alone, no character* | — | 0.771 | 3.784 |
+| *reference: self-trained style r8 @0.469 alone, no character* | — | 1.119 | 4.375 |
 
 Two things to notice before reading a winner out of it:
 
@@ -174,30 +180,64 @@ The row that does not depend on which style metric you prefer is the *reference*
 row, and its comparison against the stacked rows:
 
 ```
-kohya style alone            SWD 3.336   ← best style number in the whole table
-kohya style + LoRA char      SWD 4.666 (α1.0) / 5.011 (α1.5) / 5.559 (α2.0)
-kohya style + GPart char     SWD 5.103
-GPart style + LoRA char      SWD 3.585
-GPart style + GPart char     SWD 3.713
+                              alone    + character adapter (same style α)
+kohya style @1.5             3.336    —   (α1.0/1.5/2.0 stacked: 4.666/5.011/5.559)
+kohya style @1.0             4.008    +0.66  → 4.666 (LoRA char)
+self-trained r8 @0.469       4.375    +0.49  → 4.863 (LoRA char)
+GPart style @0.469           3.784    −0.07  → 3.713 (GPart char) / 3.585 (LoRA char)
 ```
 
-The kohya style adapter is the **best alone** and the **worst stacked**, and it
-gets worse monotonically as its α rises. The GPart style adapter stays at
-3.59–3.71 against every character adapter tried, including one from the other
-family. (Its own solo SWD is not in this table — the solo-style arms were run on
-a separate prompt set and are not comparable to these rows.)
+The kohya style adapter is the **best alone** and the **worst stacked**: it
+degrades monotonically as its α rises, and even at the α it was stacked at
+(1.0) adding a character adapter costs it +0.66 SWD. The GPart style adapter is
+worse than kohya's alone (3.784 vs 3.336), but stacking costs it nothing — its
+stacked rows (3.59–3.71) sit *at or slightly below* its own solo number. The
+self-trained r8 adapter behaves like the kohya one (+0.49), so the composability
+difference is not simply "self-trained vs community" either.
 
-**Hypothesis (untested):** kohya is dense rank-32 over attn1 + attn2 + FFN, and
-the character LoRA occupies the same module set, so the two low-rank increments
-compete for the same directions. GPart is attn2-only with a sparse 50 M support,
-overlapping the character LoRA's support much less.
+### Coverage on the style side
 
-This hypothesis has not been tested against alternatives — for instance, that the
-kohya adapter is simply saturated at the α we stacked it at, or that its training
-data overlaps the character images. Until one of those is excluded, the honest
-form is: **we found a concrete pair of adapters where the GPart one composes and
-the LoRA one does not.** That is a fact about those two files, not yet about the
-two parameterizations.
+The character report's coverage control (an all-linear GPart at matched coverage
+did *not* close its gap to LoRA) is worth repeating here. We ran an all-linear
+GPart style adapter (700 modules, 600 steps, ‖θ‖ 56.48) scaled to the attn2
+adapter's displacement (α 0.782 → ‖ΔW‖ 44.2), stacked with the same GPart
+character @1.3:
+
+| style adapter, ‖ΔW‖ = 44.2 | stacked SWD | identity |
+|---|---|---|
+| GPart attn2 @0.469 | **3.713** | 0.63 |
+| GPart all-linear @0.782 | 4.885 | 0.59 |
+| self-trained LoRA r8 @0.469 (all-linear) | 4.863 | 0.50 |
+
+They do not tie. At equal displacement the all-linear GPart style adapter is
+1.17 SWD worse, and lands on the all-linear LoRA's number (4.885 vs 4.863).
+Two consequences:
+
+- "Coverage is not the bottleneck" **does not extend to style**. Here coverage
+  is not neutral — expanding it costs 1.17 SWD at matched displacement.
+- The composability edge above is a property of the **attn2-only
+  configuration**, not of GPart: an all-linear GPart adapter composes like an
+  all-linear LoRA.
+
+Caveat: the all-linear style run is 600 steps vs 1200 for attn2, so coverage and
+training budget are not fully separated. Displacement is matched (the quantity
+stacking cares about), but per-module learning is not; a 1200-step all-linear
+style run would be needed to close that.
+
+**Hypothesis (partly tested):** kohya is dense rank-32 over attn1 + attn2 + FFN,
+and the character LoRA occupies the same module set, so the two low-rank
+increments compete for the same directions. GPart is attn2-only with a sparse
+50 M support, overlapping the character LoRA's support much less. The coverage
+control above is consistent with this — give GPart the same module coverage and
+it stacks like the LoRA — but it does not isolate subspace collision from the
+600-step training budget.
+
+This hypothesis has not been tested against all alternatives — for instance, that
+the kohya adapter is simply saturated at the α we stacked it at, or that its
+training data overlaps the character images. Until one of those is excluded, the
+honest form is: **we found a concrete configuration where the attn2-only GPart
+adapter composes and the all-linear LoRA one does not.** That is a fact about
+those files, not yet about the two parameterizations.
 
 Full table: `results/tables/holdout_three_family.csv`.
 

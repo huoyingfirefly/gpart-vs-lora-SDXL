@@ -54,10 +54,15 @@ the one the parameterization predicts:
 
 | | best alone | stacked with a character adapter |
 |---|---|---|
-| kohya style LoRA (rank 32, community-trained) | SWD **3.336** | 4.67 → 5.01 → 5.56 as α rises |
-| GPart style adapter | — | 3.59 – 3.71, flat |
+| kohya style LoRA (rank 32, community-trained) | SWD **3.336** | 4.67 → 5.01 → 5.56 as α rises (+0.66 even at α 1.0) |
+| GPart style adapter | 3.784 | 3.59 – 3.71, flat — at or below its own solo number |
+| self-trained r8 style LoRA | 4.375 | 4.86 (+0.49) |
 
-The style adapter that transfers best is the one that falls apart when composed.
+The style adapter that transfers best alone is the one that falls apart when
+composed; the self-trained r8 behaves like kohya, so that is not "self-trained
+vs community". The composability edge is also not GPart's: at equal ‖ΔW‖ an
+all-linear GPart style adapter stacks at 4.885, the all-linear LoRA's number
+(4.863) — it belongs to the attn2-only configuration.
 `docs/03-results-style-stacking.md` §5.
 
 ## Results at a glance

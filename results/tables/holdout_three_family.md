@@ -17,13 +17,19 @@ Lower is better for `|z|` and `SWD`; higher is better for `identity`.
 | gpart_stack_a088 | GPart | gpart attn2 @0.469 | gpart attn2 @0.88 | 44.2 / 68.8 | 0.42 | 12/12 | 0.480 | 3.658 |
 | gpart_stack_a100 | GPart | gpart attn2 @0.469 | gpart attn2 @1.0 | 44.2 / 78.4 | 0.54 | 12/12 | 0.475 | 3.901 |
 | gpart_stack_a160 | GPart | gpart attn2 @0.469 | gpart attn2 @1.6 | 44.2 / 125.4 | 0.56 | 12/12 | 0.434 | 3.569 |
+| gpart_stack_alllinear_078 | GPart | gpart all-linear @0.782 | gpart attn2 @1.3 | 44.2 / 101.9 | 0.59 | 12/12 | 0.593 | 4.885 |
+| gpart_stack_alllinear_100 | GPart | gpart all-linear @1.0 | gpart attn2 @1.3 | 56.5 / 101.9 | 0.57 | 12/12 | 0.594 | 4.897 |
+| gpart_stack_alllinear_167 | GPart | gpart all-linear @1.668 | gpart attn2 @1.3 | 94.2 / 101.9 | 0.47 | 12/12 | 0.803 | 5.158 |
 | hybrid_gpstyle_lochar | hybrid | gpart attn2 @0.469 | lora matched @1.0 | 44.2 / 68.8 | 0.50 | 12/12 | 0.575 | **3.585** |
 | hybrid_kohstyle_gpchar | hybrid | kohya v3 @1.0 | gpart attn2 @1.3 | 6.50 / 101.9 | 0.52 | 12/12 | 0.530 | 5.103 |
 | lora_stack_koh100 | LoRA | kohya v3 @1.0 | lora matched @1.0 | 6.50 / 68.8 | 0.57 | 12/12 | 0.652 | 4.666 |
 | lora_stack_koh150 | LoRA | kohya v3 @1.5 | lora matched @1.0 | 9.75 / 68.8 | 0.47 | 12/12 | 0.583 | 5.011 |
 | lora_stack_koh200 | LoRA | kohya v3 @2.0 | lora matched @1.0 | 13.00 / 68.8 | 0.47 | 12/12 | 0.726 | 5.559 |
 | lora_stack_r8 | LoRA | lora matched r8 @0.469 | lora matched @1.0 | 44.2 / 68.8 | 0.50 | 12/12 | 0.721 | 4.863 |
-| kohya_style_solo | solo | kohya v3 @1.5 | — | 9.75 / 0 | — | 12/12 | 0.616 | 3.336 |
+| kohya_style_solo | solo | kohya v3 @1.5 | — | 9.75 / 0 | — | 12/12 | 0.616 | **3.336** |
+| kohya_style_solo_100 | solo | kohya v3 @1.0 | — | 6.50 / 0 | — | 12/12 | 0.811 | 4.008 |
+| gpart_style_solo | solo | gpart attn2 @0.469 | — | 44.2 / 0 | — | 11/12 | 0.771 | 3.784 |
+| lora_style_solo_r8 | solo | lora matched r8 @0.469 | — | 44.2 / 0 | — | 12/12 | 1.119 | 4.375 |
 
 Reading notes:
 
@@ -39,6 +45,16 @@ Reading notes:
   character adapter**, so it is not a candidate configuration — it is the
   ceiling for "style alone". Its collapse under stacking is the finding; see
   `docs/03-results-style-stacking.md` §5.
+- **Solo-vs-stacked, at the same style α:** kohya @1.0 4.008 → stacked 4.666
+  (+0.66); self-trained r8 @0.469 4.375 → stacked 4.863 (+0.49); GPart @0.469
+  3.784 → stacked 3.713 / 3.585 (−0.07 / −0.20). GPart is the weaker style
+  adapter alone but the only one that stacking does not degrade.
+- **Coverage on the style side (equal ‖ΔW‖ = 44.2, character fixed at GPart
+  @1.3):** GPart attn2 @0.469 → SWD 3.713; GPart all-linear @0.782 → SWD 4.885;
+  self-trained LoRA r8 @0.469 (all-linear) → 4.863. Expanding GPart's coverage
+  does **not** tie: it lands on the all-linear LoRA's number. The composability
+  edge belongs to the attn2-only configuration, not to the parameterization.
+  Caveat: the all-linear style run is 600 steps vs 1200 for attn2.
 - kohya v3 ‖ΔW‖ is 6.50, computed as `up @ down * (alpha/rank)` summed in
   quadrature over 722 module pairs, from the safetensors metadata of
   `reserve1999_style_v3.safetensors` (rank 32, 1310 steps, lr 1e-4). It is

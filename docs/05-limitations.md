@@ -35,6 +35,13 @@ artifact, and we demonstrated that by moving *LoRA* to GPart's lr. We never move
 GPart to a different lr. So strictly: "at lr 5e-4, matched everything, LoRA
 wins". A GPart run that does better at 1e-3 is not excluded.
 
+**Coverage vs training budget, style side.** The all-linear style run
+(`style_alllinear_2026-10-30/r1999_d23m`) was trained 600 steps; the attn2 style
+adapter 1200. The equal-‖ΔW‖ comparison in `03-results-style-stacking.md` §5
+matches displacement but not per-module learning, so "expanded coverage is worse
+for style stacking" is a statement about that adapter, not a clean ablation of
+coverage. A 1200-step all-linear style run was not available.
+
 ## 3. Metric limitations
 
 - **Tag scores are not image quality.** The α sweep makes this concrete: the

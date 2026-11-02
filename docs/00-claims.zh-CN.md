@@ -18,7 +18,7 @@
 | R3 | 在相同图像位移（dRGB）下，GPart 的饱和度和边缘能量都低于 LoRA —— style 任务、stacking 任务、character 任务上都是如此。 | `03-results-style-stacking.zh-CN.md` §1 |
 | R4 | 训练不足对身份 tag 的破坏是不均匀的：400 步时发色和瞳色已经迁移，但配饰得分 0.00；到 800 步它们才出现。 | `02-results-character.zh-CN.md` §4 |
 | R5 | 强度也不是原因。社区 kohya 画风 LoRA（rank 32、722 模块、lr 1e-4）的 ‖ΔW‖ 只有我们自训 r8 的 **1/6.8**（6.50 vs 44.2），模块集也几乎相同（722 vs 700），而它是个**更好**的画风 adapter。所以「自训 LoRA 输是因为它窄 / 没训够」不成立：**方向比位移量重要**。 | `03-results-style-stacking.zh-CN.md` §5 |
-| R6 | 两家的分野在叠加上，而且方向和参数化文献的预期相反。kohya 画风 LoRA 是我们测到**最好的单挂画风 adapter**（SWD 3.336、\|z\| 0.616），但一叠角色 adapter 就**单调恶化**（α 1.0/1.5/2.0 → SWD 4.67/5.01/5.56）。GPart 画风叠任何角色都稳在 3.59–3.71。 | `03-results-style-stacking.zh-CN.md` §5 |
+| R6 | 两家的分野在叠加上，而且方向和参数化文献的预期相反。kohya 画风 LoRA 是我们测到**最好的单挂画风 adapter**（SWD 3.336、\|z\| 0.616），但一叠角色 adapter 就**单调恶化**（α 1.0/1.5/2.0 → SWD 4.67/5.01/5.56）。**attn2-only 的** GPart 画风单挂不如它（SWD 3.784），但叠任何角色都稳在 3.59–3.71，就在自己单挂的数上下 —— 叠加对它几乎不花钱。自训 r8 画风（单挂 4.375）叠角色同样变差（+0.49），所以这不是「自训 vs 社区」的差别。这个优势跟着 attn2-only 覆盖走：等位移的全参版 GPart 画风叠起来 4.885，和全参 LoRA（4.863）一样。 | `03-results-style-stacking.zh-CN.md` §5 |
 | R7 | 在本仓库的 `stateless` backend 下，每步成本随**被覆盖的权重数**增长，几乎与 `d` 无关：2184 M → 20.5 s/step，545.6 M → 8.11 s/step，而 `d` 从 23.2 M 提到 50 M 只多 **+13%**。 | `04-cost-model.zh-CN.md` |
 
 ## 有条件的主张
@@ -27,8 +27,8 @@
 |---|---|---|---|---|
 | K1 | LoRA 绑定角色身份比 GPart 好（各自最优点上 0.70 vs 0.57）。 | prompt 是结构性要求高的那种 —— 全身、人群、明确的构图要求。p0 就是。 | 换成任何简单取景。在四景别留出集上差距掉到 0.55 vs 0.50，配对 bootstrap 的置信区间跨 0。 | `02-results-character.zh-CN.md` §5 |
 | K2 | 在等位移量下，两家在身份上分不出来。 | 位移对齐（两边 ‖ΔW‖ 都 68.8）。 | 给 GPart 约 1.8 倍 LoRA 的位移，也就是它自己的最优 α 1.3：此时 GPart 领先 0.63 vs 0.50，CI [+0.025, +0.233]。 | `02-results-character.zh-CN.md` §5 |
-| K3 | GPart 更学得住目标画风。 | 「更」指整图色彩统计（\|z\|：0.408 vs 0.575/0.652）。 | 「更」指局部纹理（SWD）。那个口径下 GPart 画风 + LoRA 角色的混合臂赢（3.585），而 kohya 画风单挂最好（3.336）。 | `03-results-style-stacking.zh-CN.md` §5 |
-| K4 | GPart 更适合当组合底座。 | 朴素加法合并，且画风 adapter 在外层。 | **机制未确立。**「kohya 崩 / GPart 稳」是实测事实；用子空间冲突去解释它是假设，没验。 | `03-results-style-stacking.zh-CN.md` §5 |
+| K3 | GPart 更学得住目标画风。 | 「更」指整图色彩统计（\|z\|：0.408 vs 0.575/0.652）。 | 「更」指局部纹理（SWD）。那个口径下 GPart 画风 + LoRA 角色的混合臂赢（3.585）；单挂时 GPart 画风（3.784）输给 kohya（3.336），但赢过自训 r8（4.375）。 | `03-results-style-stacking.zh-CN.md` §5 |
+| K4 | GPart 更适合当组合底座。 | 朴素加法合并、画风 adapter 在外层，**且 GPart 画风是 attn2-only 版**。 | **机制未确立**，而且这个优势不是 GPart 的：等位移的全参版 GPart 画风叠起来是 4.885，就是全参 LoRA 的数（4.863）—— 优势属于 attn2-only 这个配置。子空间冲突的解释仍是没验的假设。 | `03-results-style-stacking.zh-CN.md` §5 |
 
 K1–K2 背后的那条线值得单独写出来，因为它是本仓库最可迁移的一点：
 
